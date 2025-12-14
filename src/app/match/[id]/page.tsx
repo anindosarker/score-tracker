@@ -39,27 +39,31 @@ export default function PublicMatch() {
     );
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
-      {/* Subtle Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+    <div className="min-h-screen w-full bg-slate-50/50 dark:bg-slate-950/50 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
-      <div className="container mx-auto max-w-4xl px-4 py-8 md:py-16 relative z-10">
-        <MatchHeader
-          title={match.title}
-          sport={match.sport}
-          status={match.status}
-        />
+      <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12 relative z-10">
+        <div className="grid gap-6">
+          {/* Header matches grid width */}
+          <MatchHeader
+            title={match.title}
+            sport={match.sport}
+            status={match.status}
+          />
 
-        <Scoreboard match={match} />
+          {/* Scoreboard consumes main area */}
+          <Scoreboard match={match} />
 
-        <div className="mt-12 md:mt-16">
-          <Comments matchId={id} />
-        </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-xs text-muted-foreground font-semibold tracking-wider uppercase opacity-70">
-            Powered by Score Tracker
-          </p>
+          {/* Comments in their own section */}
+          <div className="mt-8 max-w-3xl mx-auto w-full">
+            <Comments matchId={id} />
+            <div className="mt-12 text-center">
+              <p className="text-xs text-muted-foreground font-semibold tracking-wider uppercase opacity-70">
+                Powered by Score Tracker
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
