@@ -6,6 +6,7 @@ import httpClient from "@/lib/utils/httpClient";
 class MatchService {
   async createMatch(data: {
     title: string;
+    sport: string;
     team1: { name: string };
     team2: { name: string };
   }) {
@@ -23,8 +24,24 @@ class MatchService {
     return res.data;
   }
 
-  async updateMatch(id: string, data: Partial<IMatch>) {
+  async updateMatch(id: string, data: any) {
     const res = await httpClient.patch<IMatch>(`/matches/${id}`, data);
+    return res.data;
+  }
+
+  async getComments(matchId: string) {
+    const res = await httpClient.get<any[]>(`/matches/${matchId}/comments`);
+    return res.data;
+  }
+
+  async postComment(
+    matchId: string,
+    data: { content: string; guestName?: string }
+  ) {
+    const res = await httpClient.post<any>(
+      `/matches/${matchId}/comments`,
+      data
+    );
     return res.data;
   }
 }

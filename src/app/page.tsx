@@ -1,113 +1,180 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
+import { Loader2, LogIn, UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
-  const { data: session, isPending, error } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const signUp = async () => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     await authClient.signUp.email(
-      {
-        email,
-        password,
-        name,
-      },
+      { email, password, name },
       {
         onSuccess: () => {
-          window.location.reload();
+          toast.success("Account created successfully!");
+          router.push("/dashboard");
         },
         onError: (ctx) => {
-          console.error("SignUp Error:", ctx.error.message);
+          toast.error(ctx.error.message);
+          setLoading(false);
         },
       }
     );
   };
 
-  const signIn = async () => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
+      { email, password },
       {
         onSuccess: () => {
-          window.location.reload();
+          toast.success("Welcome back!");
+          router.push("/dashboard");
         },
         onError: (ctx) => {
-          console.error("SignIn Error:", ctx.error.message);
+          toast.error(ctx.error.message);
+          setLoading(false);
         },
       }
     );
-  };
-
-  const signOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          window.location.reload();
-        },
-      },
-    });
   };
 
   if (isPending) {
-    return <div className="p-10">Loading...</div>;
-  }
-
-  if (session) {
     return (
-      <div className="p-10">
-        <h1 className="text-2xl font-bold">Welcome, {session.user.name}</h1>
-        <p>Email: {session.user.email}</p>
-        <button
-          onClick={signOut}
-          className="bg-red-500 text-white px-4 py-2 mt-4 rounded"
-        >
-          Sign Out
-        </button>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
+  if (session) {
+    router.push("/dashboard");
+    return null;
+  }
+
   return (
-    <div className="p-10 flex flex-col gap-4 max-w-sm mx-auto">
-      <h1 className="text-2xl font-bold">Score Tracker Auth Test</h1>
-      <input
-        placeholder="Name (for signup)"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border p-2 rounded text-black"
-      />
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 rounded text-black"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 rounded text-black"
-      />
-      <div className="flex gap-4">
-        <button
-          onClick={signIn}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Sign In
-        </button>
-        <button
-          onClick={signUp}
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Sign Up
-        </button>
-      </div>
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Score Tracker</CardTitle>
+          <CardDescription>
+            Manage your matches and scores in real-time
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="user@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogIn className="mr-2 h-4 w-4" />
+                  )}
+                  Sign In
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="su-email">Email</Label>
+                  <Input
+                    id="su-email"
+                    type="email"
+                    placeholder="user@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="su-password">Password</Label>
+                  <Input
+                    id="su-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="mr-2 h-4 w-4" />
+                  )}
+                  Create Account
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+        <CardFooter className="flex justify-center text-xs text-muted-foreground">
+          By continuing, you agree to our Terms of Service.
+        </CardFooter>
+      </Card>
     </div>
   );
 }

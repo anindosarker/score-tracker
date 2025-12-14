@@ -1,8 +1,16 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMatchAction } from "@/hooks/actions/useMatchAction";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
@@ -14,6 +22,7 @@ export default function Dashboard() {
   const { data: matches, isLoading } = useMatchesQuery();
 
   const [title, setTitle] = useState("");
+  const [sport, setSport] = useState("FOOTBALL");
   const [team1, setTeam1] = useState("");
   const [team2, setTeam2] = useState("");
 
@@ -21,6 +30,7 @@ export default function Dashboard() {
     createMatchMutation.mutate(
       {
         title,
+        sport,
         team1: { name: team1 },
         team2: { name: team2 },
       },
@@ -37,27 +47,31 @@ export default function Dashboard() {
   if (isLoading) return <div className="p-8">Loading matches...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <span>{session?.user.name}</span>
-          <Button variant="destructive" onClick={() => authClient.signOut()}>
-            Sign Out
-          </Button>
-        </div>
-      </div>
-
+    <div className="space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>Create New Match</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input
-            placeholder="Match Title (e.g., Finals)"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          <div className="flex gap-4">
+            <Input
+              placeholder="Match Title (e.g., Finals)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="flex-1"
+            />
+            <Select value={sport} onValueChange={setSport}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Sport" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CRICKET">Cricket</SelectItem>
+                <SelectItem value="FOOTBALL">Football</SelectItem>
+                <SelectItem value="BASKETBALL">Basketball</SelectItem>
+                <SelectItem value="HANDBALL">Handball</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Input
               placeholder="Team 1 Name"
@@ -84,19 +98,36 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2">
           {matches?.map((match: any) => (
             <Card key={match._id}>
-              <CardHeader>
-                <CardTitle>{match.title}</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xl font-bold">
+                  {match.title}
+                </CardTitle>
+                <Badge variant="secondary">{match.sport}</Badge>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center mb-4">
                   <div className="text-center">
                     <p className="font-bold text-lg">{match.team1.name}</p>
-                    <p className="text-2xl">{match.team1.score}</p>
+                    <p className="text-2xl font-mono">
+                      {match.team1.score}
+                      {match.sport === "CRICKET" && (
+                        <span className="text-sm text-muted-foreground">
+                          /{match.team1.wickets}
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  <span className="text-muted-foreground">VS</span>
+                  <span className="text-muted-foreground font-bold">VS</span>
                   <div className="text-center">
                     <p className="font-bold text-lg">{match.team2.name}</p>
-                    <p className="text-2xl">{match.team2.score}</p>
+                    <p className="text-2xl font-mono">
+                      {match.team2.score}
+                      {match.sport === "CRICKET" && (
+                        <span className="text-sm text-muted-foreground">
+                          /{match.team2.wickets}
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
                 <div className="flex justify-between gap-2">
