@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ThemeCustomizer } from "./theme-customizer";
 
 // Menu items.
 const privateItems = [
@@ -111,13 +113,19 @@ export function AppSidebar() {
           )}
         </div>
         {session ? (
-          <SidebarMenuButton
-            onClick={handleSignOut}
-            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Sign Out</span>
-          </SidebarMenuButton>
+          <SidebarFooter>
+            <div className="p-2 space-y-2">
+              <ThemeCustomizer />
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          </SidebarFooter>
         ) : (
           <SidebarMenuButton
             asChild

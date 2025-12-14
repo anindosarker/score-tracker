@@ -43,29 +43,31 @@ export function MatchHeader({
   const isLive = status === "LIVE";
 
   return (
-    <div className="mb-10 flex flex-col items-center text-center space-y-6">
+    <div className="mb-10 flex flex-col items-center text-center space-y-6 animate-in fade-in slide-in-from-top-4 duration-700">
       <Badge
         variant="secondary"
-        className="px-4 py-1.5 text-sm font-semibold tracking-wide uppercase bg-white/80 dark:bg-slate-800/80 backdrop-blur shadow-sm"
+        className="px-4 py-1.5 text-sm font-semibold tracking-wide uppercase bg-background/50 backdrop-blur shadow-sm border border-border/50"
       >
         {sport}
       </Badge>
-      <h1 className="text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-sm">
+      <h1 className="text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-sm text-balance">
         {title}
       </h1>
       <div className="flex items-center gap-4">
         <span
           className={cn(
-            "inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-all",
+            "inline-flex items-center rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider shadow-sm transition-all border",
             isLive
-              ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800"
-              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+              ? "bg-red-500/10 text-red-600 border-red-200 dark:border-red-900"
+              : "bg-muted text-muted-foreground border-border"
           )}
         >
           <span
             className={cn(
               "mr-2 h-2 w-2 rounded-full",
-              isLive ? "bg-red-500 animate-pulse" : "bg-slate-500"
+              isLive
+                ? "bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+                : "bg-slate-400"
             )}
           />
           {status}
@@ -73,7 +75,7 @@ export function MatchHeader({
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-2 rounded-full text-xs font-semibold bg-white/50 dark:bg-slate-900/50 backdrop-blur border-slate-200 dark:border-slate-800 hover:bg-white hover:dark:bg-slate-900"
+          className="h-8 gap-2 rounded-full text-xs font-semibold backdrop-blur hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
           onClick={handleShare}
         >
           <Share2 className="h-3.5 w-3.5" />
