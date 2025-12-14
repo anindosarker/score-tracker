@@ -3,6 +3,16 @@ import httpClient from "@/lib/utils/httpClient";
 // Note: importing IMatch from backend model for type safety in frontend.
 // Ideally should be in shared types but this works for now.
 
+export interface IComment {
+  _id: string;
+  matchId: string;
+  userId?: string;
+  guestName?: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 class MatchService {
   async createMatch(data: {
     title: string;
@@ -24,13 +34,15 @@ class MatchService {
     return res.data;
   }
 
-  async updateMatch(id: string, data: any) {
+  async updateMatch(id: string, data: Partial<IMatch>) {
     const res = await httpClient.patch<IMatch>(`/matches/${id}`, data);
     return res.data;
   }
 
   async getComments(matchId: string) {
-    const res = await httpClient.get<any[]>(`/matches/${matchId}/comments`);
+    const res = await httpClient.get<IComment[]>(
+      `/matches/${matchId}/comments`
+    );
     return res.data;
   }
 
@@ -38,7 +50,7 @@ class MatchService {
     matchId: string,
     data: { content: string; guestName?: string }
   ) {
-    const res = await httpClient.post<any>(
+    const res = await httpClient.post<IComment>(
       `/matches/${matchId}/comments`,
       data
     );

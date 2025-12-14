@@ -19,8 +19,13 @@ export function useMatchAction() {
   });
 
   const updateMatchMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      matchServiceFrontend.updateMatch(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<import("@/backend/models/match.model").IMatch>;
+    }) => matchServiceFrontend.updateMatch(id, data),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
         queryKey: MATCH_KEYS.detail(variables.id),

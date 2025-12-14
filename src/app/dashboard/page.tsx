@@ -1,8 +1,15 @@
 "use client";
 
+import { IMatch } from "@/backend/models/match.model";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useMatchAction } from "@/hooks/actions/useMatchAction";
 import { authClient } from "@/lib/auth-client";
+import { ArrowRight, Plus, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -44,24 +52,42 @@ export default function Dashboard() {
     );
   };
 
-  if (isLoading) return <div className="p-8">Loading matches...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <Card>
+    <div className="container mx-auto max-w-5xl space-y-10 p-6 lg:p-10">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Manage your matches and create new ones.
+        </p>
+      </div>
+
+      <Card className="border-dashed border-2 shadow-sm">
         <CardHeader>
-          <CardTitle>Create New Match</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" /> Create New Match
+          </CardTitle>
+          <CardDescription>
+            Start tracking a new game instantly.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4">
+          <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
             <Input
-              placeholder="Match Title (e.g., Finals)"
+              placeholder="Match Title (e.g., Summer Cup Finals)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="flex-1"
+              className="h-10"
             />
             <Select value={sport} onValueChange={setSport}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="h-10">
                 <SelectValue placeholder="Select Sport" />
               </SelectTrigger>
               <SelectContent>
@@ -87,6 +113,7 @@ export default function Dashboard() {
           <Button
             onClick={handleCreate}
             disabled={createMatchMutation.isPending}
+            className="w-full md:w-auto"
           >
             {createMatchMutation.isPending ? "Creating..." : "Create Match"}
           </Button>
@@ -94,47 +121,78 @@ export default function Dashboard() {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Your Matches</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {matches?.map((match: any) => (
-            <Card key={match._id}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xl font-bold">
+        <h2 className="text-xl font-semibold tracking-tight">Your Matches</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {matches?.map((match: IMatch) => (
+            <Card
+              key={match._id as unknown as string}
+              className="group relative overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-primary/5 opacity-0 transition-opacity group-hover:opacity-100" />
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-xs font-normal"
+                  >
+                    {match.sport}
+                  </Badge>
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      match.status === "LIVE"
+                        ? "bg-red-500 animate-pulse"
+                        : "bg-muted"
+                    }`}
+                  />
+                </div>
+                <CardTitle className="line-clamp-1 text-lg font-bold tracking-tight relative z-10">
                   {match.title}
                 </CardTitle>
-                <Badge variant="secondary">{match.sport}</Badge>
               </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-4">
-                  <div className="text-center">
-                    <p className="font-bold text-lg">{match.team1.name}</p>
-                    <p className="text-2xl font-mono">
+              <CardContent className="space-y-4 relative z-10">
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-muted/50 p-3">
+                  <div className="text-center min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-muted-foreground">
+                      {match.team1.name}
+                    </p>
+                    <p className="text-2xl font-black">
                       {match.team1.score}
                       {match.sport === "CRICKET" && (
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
                           /{match.team1.wickets}
                         </span>
                       )}
                     </p>
                   </div>
-                  <span className="text-muted-foreground font-bold">VS</span>
-                  <div className="text-center">
-                    <p className="font-bold text-lg">{match.team2.name}</p>
-                    <p className="text-2xl font-mono">
+                  <div className="text-xs font-bold text-muted-foreground/50">
+                    VS
+                  </div>
+                  <div className="text-center min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-muted-foreground">
+                      {match.team2.name}
+                    </p>
+                    <p className="text-2xl font-black">
                       {match.team2.score}
                       {match.sport === "CRICKET" && (
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs font-normal text-muted-foreground ml-0.5">
                           /{match.team2.wickets}
                         </span>
                       )}
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <Button asChild variant="outline">
-                    <Link href={`/match/${match._id}`}>Public View</Link>
+                <div className="flex gap-2">
+                  <Button
+                    asChild
+                    variant="secondary"
+                    className="w-full"
+                    size="sm"
+                  >
+                    <Link href={`/match/${match._id}`}>
+                      View <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
                   </Button>
-                  <Button asChild>
+                  <Button asChild size="sm" className="w-full">
                     <Link href={`/match/${match._id}/manage`}>Manage</Link>
                   </Button>
                 </div>
@@ -142,7 +200,15 @@ export default function Dashboard() {
             </Card>
           ))}
           {matches?.length === 0 && (
-            <p className="text-muted-foreground">No matches found.</p>
+            <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed p-10 text-center animate-in fade-in-50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Trophy className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">No matches yet</h3>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Create a match to start tracking scores.
+              </p>
+            </div>
           )}
         </div>
       </div>

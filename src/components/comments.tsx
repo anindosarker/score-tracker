@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCommentAction } from "@/hooks/actions/useCommentAction";
 import { authClient } from "@/lib/auth-client";
+import { IComment } from "@/lib/services/match.service";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, MessageSquare, Send } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface CommentsProps {
   matchId: string;
@@ -35,7 +37,7 @@ export function Comments({ matchId }: CommentsProps) {
     if (!content.trim()) return;
 
     if (!session && !guestName.trim()) {
-      alert("Please enter a name");
+      toast.error("Please enter a name");
       return;
     }
 
@@ -48,82 +50,45 @@ export function Comments({ matchId }: CommentsProps) {
       {
         onSuccess: () => {
           setContent("");
+          toast.success("Comment posted!");
         },
       }
     );
   };
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>Comments</CardTitle>
+    <Card className="mt-6 border-none shadow-none bg-transparent">
+      <CardHeader className="px-0">
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <MessageSquare className="h-5 w-5" />
+          Live Comments {comments?.length ? `(${comments.length})` : ""}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4 mb-6">
-          {isLoading ? (
-            <div className="flex justify-center p-4">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : comments?.length === 0 ? (
-            <p className="text-center text-muted-foreground text-sm py-4">
-              No comments yet. Be the first!
-            </p>
-          ) : (
-            comments?.map((comment: any) => (
-              <div key={comment._id} className="flex gap-3 items-start">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${
-                      comment.userId
-                        ? "user-" + comment.userId
-                        : comment.guestName
-                    }`}
-                  />
-                  <AvatarFallback>
-                    {(comment.guestName || "U")[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 bg-muted/50 rounded-lg p-3 text-sm">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="font-semibold">
-                      {comment.guestName || "User"}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(comment.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-foreground/90 whitespace-pre-wrap">
-                    {comment.content}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
+      <CardContent className="px-0">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 mb-8 bg-card p-4 rounded-xl border shadow-sm"
+        >
           {!session && (
             <Input
               placeholder="Your Name (Guest)"
               value={guestName}
               onChange={(e) => setGuestName(e.target.value)}
-              className="max-w-xs"
+              className="max-w-xs bg-background/50 border-transparent focus:border-primary hover:bg-background transition-colors"
             />
           )}
-          <div className="flex gap-2">
+          <div className="relative">
             <Textarea
-              placeholder="Write a comment..."
+              placeholder="Cheer for your team..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[80px]"
+              className="min-h-[80px] bg-background/50 border-transparent focus:border-primary hover:bg-background transition-colors resize-none pr-12"
             />
             <Button
               type="submit"
               size="icon"
               disabled={postCommentMutation.isPending}
-              className="self-end"
+              className="absolute right-2 bottom-2 h-8 w-8 rounded-full"
             >
               {postCommentMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -133,6 +98,53 @@ export function Comments({ matchId }: CommentsProps) {
             </Button>
           </div>
         </form>
+
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/30" />
+            </div>
+          ) : comments?.length === 0 ? (
+            <div className="text-center py-10 rounded-xl border border-dashed text-muted-foreground bg-muted/20">
+              <p>No comments yet. Start the conversation!</p>
+            </div>
+          ) : (
+            comments?.map((comment: IComment) => (
+              <div
+                key={comment._id}
+                className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-300"
+              >
+                <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${
+                      comment.userId
+                        ? "user-" + comment.userId
+                        : comment.guestName
+                    }`}
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {(comment.guestName || "U")[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-bold text-sm tracking-tight">
+                      {comment.guestName || "User"}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground/60">
+                      {formatDistanceToNow(new Date(comment.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  <div className="bg-card px-4 py-3 rounded-2xl rounded-tl-none border shadow-sm text-sm leading-relaxed text-foreground/90">
+                    {comment.content}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );
